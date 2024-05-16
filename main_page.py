@@ -44,7 +44,7 @@ def create_folder():
 open_ai_model_text = OpenAIModel(
     api_key=OPENAI_API_KEY,
     parameters={
-        "model": "gpt-4o",
+        "model": "gpt-4-turbo-preview",
         "temperature": 0.2,
         "max_tokens": 1500,
     },
