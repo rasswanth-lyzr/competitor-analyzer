@@ -129,7 +129,7 @@ def save_raw_data_database(
     base_research_document = {
         "competitor_name": competitor_name,
         "competitors_list_document_id": competitors_list_document_id,
-        "raw_data": search_results + scrape_results,
+        "raw_data": raw_data,
         "created_at": datetime.datetime.now(datetime.UTC),
     }
 
