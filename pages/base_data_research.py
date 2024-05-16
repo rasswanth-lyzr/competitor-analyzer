@@ -160,7 +160,7 @@ def write_email_report(company_name):
         output_type=OutputType.TEXT,
         input_type=InputType.TEXT,
         model=open_ai_model_text,
-        instructions=f"Use the information provided about the company {company_name} and write an email digest. Send the response in HTML without any markdown. Use bullets for points and beautify it be as creative as you want",
+        instructions=f"Use the information provided about the company {company_name} and write an email digest. Send the response in text without any markdown. Use bullets for points and beautify it be as creative as you want",
         log_output=True,
         enhance_prompt=False,
     ).execute()
