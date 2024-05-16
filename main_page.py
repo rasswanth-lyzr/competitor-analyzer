@@ -30,6 +30,7 @@ EMAIL = os.getenv("EMAIL")
 PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
 
 FOLDER_NAME = "raw_data_files"
+AGENTS_FILE = "assistant_ids.json"
 
 
 # FUNCTIONS
@@ -39,6 +40,9 @@ def create_folder():
         shutil.rmtree(FOLDER_NAME)
 
     os.makedirs(FOLDER_NAME)
+
+    if os.path.exists(AGENTS_FILE):
+        os.remove(AGENTS_FILE)
 
 
 open_ai_model_text = OpenAIModel(
