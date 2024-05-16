@@ -38,7 +38,7 @@ FOLDER_NAME = "raw_data_files"
 open_ai_model_text = OpenAIModel(
     api_key=OPENAI_API_KEY,
     parameters={
-        "model": "gpt-4-turbo-preview",
+        "model": "gpt-4o",
         "temperature": 0.2,
         "max_tokens": 1500,
     },

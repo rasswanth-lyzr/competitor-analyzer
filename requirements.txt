@@ -7,3 +7,4 @@ fastapi
 gnews
 newspaper4k
 lyzr==0.1.38
+llama-index
