@@ -6,4 +6,4 @@ lxml_html_clean
 fastapi
 gnews
 newspaper4k
-lyzr
+lyzr==0.1.38

@@ -125,6 +125,7 @@ def scrape_competitor_analysis(company_name, website_name):
 def save_raw_data_database(
     competitor_name, competitors_list_document_id, search_results="", scrape_results=""
 ):
+    raw_data = search_results + f"\n\nRecent Headlines about {competitor_name}:\n" + scrape_results
     base_research_document = {
         "competitor_name": competitor_name,
         "competitors_list_document_id": competitors_list_document_id,
