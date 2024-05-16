@@ -103,16 +103,16 @@ def scrape_competitor_analysis(company_name, website_name):
     google_news = GNews(period="7d", max_results=10)
     company_news = google_news.get_news(company_name)
 
-    website_name = remove_www(website_name)
-    website_news = google_news.get_news_by_site(website_name)
+    # website_name = remove_www(website_name)
+    # website_news = google_news.get_news_by_site(website_name)
 
     for c_news in company_news:
         scraped_data += str(i) + ". " + c_news["title"] + "\n"
         i += 1
 
-    for w_news in website_news:
-        scraped_data += str(i) + ". " + w_news["title"] + "\n"
-        i += 1
+    # for w_news in website_news:
+    #     scraped_data += str(i) + ". " + w_news["title"] + "\n"
+    #     i += 1
 
         # try:
         #     article = google_news.get_full_article(news["url"])
