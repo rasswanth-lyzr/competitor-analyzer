@@ -34,7 +34,6 @@ AGENTS_FILE = "assistant_ids.json"
 
 
 # FUNCTIONS
-@st.cache_data
 def create_folder():
     if os.path.exists(FOLDER_NAME):
         shutil.rmtree(FOLDER_NAME)
@@ -68,7 +67,7 @@ def search_for_competitors(company_name):
         output_type=OutputType.TEXT,
         input_type=InputType.TEXT,
         model=perplexity_model_text,
-        instructions=f"Return only a dictionary of 5 competitors for the company {company_name} with names and website URLs in the format: {{'CompanyA': 'www.companya.com', 'CompanyB': 'www.companyb.com'}}. RETURN ONLY THE DICTIONARY.",
+        instructions=f"Find 5 competitors for the company {company_name} with names and website URLs. Output Format - {{'CompanyA': 'www.companya.com', 'CompanyB': 'www.companyb.com'}}. Return ONLY the dictionary.",
         log_output=True,
     ).execute()
 
@@ -118,18 +117,22 @@ def scrape_competitor_analysis(company_name, website_name):
     #     scraped_data += str(i) + ". " + w_news["title"] + "\n"
     #     i += 1
 
-        # try:
-        #     article = google_news.get_full_article(news["url"])
-        #     scraped_data += article.title + article.text + "\n"
-        # except:
-        #     print("Couldn't scrape article")
+    # try:
+    #     article = google_news.get_full_article(news["url"])
+    #     scraped_data += article.title + article.text + "\n"
+    # except:
+    #     print("Couldn't scrape article")
     return scraped_data
 
 
 def save_raw_data_database(
     competitor_name, competitors_list_document_id, search_results="", scrape_results=""
 ):
-    raw_data = search_results + f"\n\nRecent Headlines about {competitor_name}:\n" + scrape_results
+    raw_data = (
+        search_results
+        + f"\n\nRecent Headlines about {competitor_name}:\n"
+        + scrape_results
+    )
     base_research_document = {
         "competitor_name": competitor_name,
         "competitors_list_document_id": competitors_list_document_id,
@@ -185,8 +188,6 @@ def analyze_competitors():
 
 # STREAMLIT COMPONENTS
 
-create_folder()
-
 
 def display_competitors():
     if st.session_state.competitors:
@@ -215,8 +216,7 @@ if st.button("Fetch Competitors"):
     #     "Lilac": "www.lilac.ai",
     #     "VoyagerAnalytics": "www.voyageranalytics.com",
     # }
-    
-    
+
 
 st.write("## Add a competitor")
 col1, col2 = st.columns(2)
@@ -247,6 +247,7 @@ if st.button("Delete Competitor"):
 display_competitors()
 
 if st.button("Submit Competitors for Analysis", type="primary"):
+    create_folder()
     analyze_competitors()
     st.write(
         """
