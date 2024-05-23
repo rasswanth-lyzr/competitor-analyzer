@@ -4,6 +4,6 @@ pymongo
 python-dotenv
 lxml_html_clean
 fastapi
-gnews
+gnews==0.3.7
 newspaper4k
 lyzr==0.1.38
