@@ -264,4 +264,4 @@ if st.button("Submit Competitors for Analysis", type="primary"):
         # Analysis complete! :star:
         ### Go to :red[Base Data Research] Page"""
     )
-    st.page_link("pages/base_data_research.py", label="Base Data Research", icon="📊")
+    st.page_link("pages/1_base_data_research.py", label="Base Data Research", icon="📊")

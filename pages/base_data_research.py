@@ -71,10 +71,19 @@ def process_data(
     )
     metrics_data = parse_json_output(metrics_data_raw)
     # metrics_data = {
-    #     "annual_revenue_usd": None,
-    #     "number_of_employees": 250,
-    #     "headquarters_location": "Toronto, Canada",
-    #     "competitor_name": "Cohere",
+    #     "website": "http://www.microsoft.com",
+    #     "sector": "Technology",
+    #     "industry": "Software and Video Games",
+    #     "location": "Redmond, Washington, USA",
+    #     "number_of_employees": 221000,
+    #     "founding_year": 1975,
+    #     "company_type": "Public",
+    #     "market_cap": None,
+    #     "annual_revenue": "US$110.36 billion (2018)",
+    #     "linkedin_url": None,
+    #     "tagline": "Empower every person and every organization on the planet to achieve more.",
+    #     "stock_ticker": "MSFT",
+    #     "competitor_name": "Microsoft",
     # }
     save_metrics_data_database(
         metrics_data,
@@ -199,10 +208,14 @@ def save_metrics_data_database(
 
 def save_metrics_data_file(metrics_data, competitor_name):
     FILE_NAME = os.path.join(FOLDER_NAME, competitor_name + ".txt")
-    data_str = json.dumps(metrics_data)
+    metrics_dict = st.session_state.metrics_dict
     with open(FILE_NAME, "a") as my_file:
         my_file.write(f"\n\nMetrics about the company {competitor_name}:\n")
-        my_file.write(data_str)
+        for key, value in metrics_data.items():
+            if key in list(metrics_dict.keys()):
+                my_file.write(metrics_dict[key] + ": " + str(value) + "\n")
+            else:
+                my_file.write(key + ": " + value  + "\n")
 
 
 # STREAMLIT COMPONENTS
@@ -245,7 +258,15 @@ metrics_values = st.text_input(
     value="Website, Sector, Industry, Location, Number of Employees, Founding Year, Company Type, Market Cap, Annual Revenue, LinkedIn URL, Tagline, Stock Ticker",
 )
 metrics_list_values = metrics_values.split(",")
-metrics_list_keys = [convert_field_name_advanced(name) for name in metrics_list_values]
+
+metrics_dict = {}
+for name in metrics_list_values:
+    key_value = convert_field_name_advanced(name.strip())
+    metrics_dict[key_value] = name.strip()
+
+metrics_list_keys = list(metrics_dict.keys())
+
+st.session_state.metrics_dict = metrics_dict
 
 report_button = st.button("Generate report")
 if report_button:
@@ -265,6 +286,6 @@ if report_button:
         # Report generated! :sparkles:
         ### Go to :red[Reports] Page"""
     )
-    st.page_link("pages/reports.py", label="Reports", icon="📁")
+    st.page_link("pages/2_reports.py", label="Reports", icon="📁")
     st.write("### To chat with the data, go to :red[Chatbot] page")
-    st.page_link("pages/chatbot.py", label="Chatbot", icon="🤖")
+    st.page_link("pages/3_chatbot.py", label="Chatbot", icon="🤖")

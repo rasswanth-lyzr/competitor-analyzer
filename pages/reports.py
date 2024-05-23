@@ -58,9 +58,14 @@ keys_to_ignore = {
 for result in results:
     with st.expander(result["competitor_name"]):
         st.write("# Summary")
-        st.write(result["email_report"], unsafe_allow_html=True)
+        st.write(result["email_report"])
         st.write("# Metrics")
         new_data = {
             key: value for key, value in result.items() if key not in keys_to_ignore
         }
-        st.write(new_data)
+        metrics_dict = st.session_state.metrics_dict
+        for key, value in new_data.items():
+            if key in list(metrics_dict.keys()):
+                st.write(f"- **{metrics_dict[key]}**: {value}")
+            else:
+                st.write(f"- **{key}**: {value}")
