@@ -1,6 +1,7 @@
 import ast
 import datetime
 import os
+import re
 import shutil
 
 import newspaper
@@ -47,51 +48,31 @@ def create_folder():
 open_ai_model_text = OpenAIModel(
     api_key=OPENAI_API_KEY,
     parameters={
-        "model": "gpt-4-turbo-preview",
+        "model": "gpt-4o",
         "temperature": 0.2,
         "max_tokens": 1500,
     },
 )
 
-perplexity_model_text = PerplexityModel(
-    api_key=PERPLEXITY_API_KEY,
-    parameters={
-        "model": "pplx-7b-online",
-    },
-)
+# perplexity_model_text = PerplexityModel(
+#     api_key=PERPLEXITY_API_KEY,
+#     parameters={
+#         "model": "pplx-7b-online",
+#     },
+# )
 
 
-def search_for_competitors(company_name):
-    search_task = Task(
-        name="Competitors search",
-        output_type=OutputType.TEXT,
-        input_type=InputType.TEXT,
-        model=perplexity_model_text,
-        instructions=f"Find 5 competitors for the company {company_name} with names and website URLs. Output Format - {{'CompanyA': 'www.companya.com', 'CompanyB': 'www.companyb.com'}}. Return ONLY the dictionary.",
-        log_output=True,
-    ).execute()
+# def search_for_competitors(company_name):
+#     search_task = Task(
+#         name="Competitors search",
+#         output_type=OutputType.TEXT,
+#         input_type=InputType.TEXT,
+#         model=perplexity_model_text,
+#         instructions=f"Find 5 competitors for the company {company_name} with names and website URLs. Output Format - {{'CompanyA': 'www.companya.com', 'CompanyB': 'www.companyb.com'}}. Return ONLY the dictionary.",
+#         log_output=True,
+#     ).execute()
 
-    return search_task["choices"][0]["message"]["content"]
-
-
-def search_competitor_analysis(company_name, website_name):
-    search_task = Task(
-        name="Website data search",
-        output_type=OutputType.TEXT,
-        input_type=InputType.TEXT,
-        model=perplexity_model_text,
-        instructions=f"""I need a comprehensive search for the most recent news regarding the company {company_name} with website {website_name}. Please focus on the following areas:
-        1. Strategic Developments
-        2. Financial Performance
-        3. Product Innovations and Launches
-        4. Regulatory and Legal Changes
-        5. Leadership Changes
-        6. Industry Trends and Analysis
-        """,
-        log_output=True,
-    ).execute()
-
-    return search_task["choices"][0]["message"]["content"]
+#     return search_task["choices"][0]["message"]["content"]
 
 
 def remove_www(url):
@@ -100,39 +81,79 @@ def remove_www(url):
     return url
 
 
+def format_key(title):
+    # Remove non-alphanumeric characters and convert to lowercase
+    key = re.sub(r"\W+", "_", title).lower()
+    return key
+
+
 def scrape_competitor_analysis(company_name, website_name):
     scraped_data = ""
-    i = 1
-    google_news = GNews(period="7d", max_results=10)
+    google_news = GNews(period="7d", max_results=25)
     company_news = google_news.get_news(company_name)
+    website_name = remove_www(website_name)
+    website_news = google_news.get_news_by_site(website_name)
 
-    # website_name = remove_www(website_name)
-    # website_news = google_news.get_news_by_site(website_name)
+    news_article_list = []
+    news_dict = {}
+    for news in company_news:
+        news_article_list.append(news["title"])
+        key = format_key(news["title"])
+        value = news["url"]
+        news_dict[key] = value
 
-    for c_news in company_news:
-        scraped_data += str(i) + ". " + c_news["title"] + "\n"
-        i += 1
+    for news in website_news:
+        news_article_list.append(news["title"])
+        key = format_key(news["title"])
+        value = news["url"]
+        news_dict[key] = value
 
-    # for w_news in website_news:
-    #     scraped_data += str(i) + ". " + w_news["title"] + "\n"
-    #     i += 1
+    news_picker_agent = Agent(
+        prompt_persona="""You are an expert news analyst. You have been given a list of news article headlines about a company. Your task is to identify and return the top 10 headlines that are the most important and impactful.
+Consider the following criteria when evaluating each headline:
+- Uniqueness: Avoid selecting multiple headlines that discuss the same event or topic. Each of the top 5 headlines should cover a distinct and different event or aspect.
+- Relevance: How directly the headline pertains to significant events or developments related to the company (e.g., major financial moves, significant product launches, legal issues, executive changes, etc.).
+- Impact: The potential effect of the news on the company's operations, stock price, public perception, or industry standing.
 
-    # try:
-    #     article = google_news.get_full_article(news["url"])
-    #     scraped_data += article.title + article.text + "\n"
-    # except:
-    #     print("Couldn't scrape article")
+OUTPUT FORMAT - A list containing the headlines - [Headline 1, Headline 2, ...]
+
+Please return the top 10 headlines. If the input has less than 10 headlines, return all.
+""",
+        role="News picker",
+    )
+
+    news_picker_task = Task(
+        name="Filter News Task",
+        agent=news_picker_agent,
+        output_type=OutputType.TEXT,
+        input_type=InputType.TEXT,
+        model=open_ai_model_text,
+        instructions="Filter the news results and give top 10 headlines in a list. Return ONLY the list",
+        log_output=True,
+        enhance_prompt=False,
+        default_input=news_article_list,
+    ).execute()
+
+    headlines_list = ast.literal_eval(news_picker_task)
+    cleaned_headlines = [format_key(headline.strip()) for headline in headlines_list]
+
+    for title in cleaned_headlines:
+        url = news_dict[title]
+        try:
+            full_article = google_news.get_full_article(url)
+            article_title = full_article.title
+            article_text = full_article.text
+            scraped_data += "Title: " + article_title + "\n" + article_text + "\n"
+        except:
+            print("Error")
+
     return scraped_data
 
 
 def save_raw_data_database(
-    competitor_name, competitors_list_document_id, search_results="", scrape_results=""
+    competitor_name, competitors_list_document_id, scrape_results=""
 ):
-    raw_data = (
-        search_results
-        + f"\n\nRecent Headlines about {competitor_name}:\n"
-        + scrape_results
-    )
+    raw_data = f"Recent Articles about {competitor_name}:\n" + scrape_results
     base_research_document = {
         "competitor_name": competitor_name,
         "competitors_list_document_id": competitors_list_document_id,
@@ -143,11 +164,10 @@ def save_raw_data_database(
     base_research_collection.insert_one(base_research_document)
 
 
-def save_raw_data_file(competitor_name, search_results="", scrape_results=""):
+def save_raw_data_file(competitor_name, scrape_results=""):
     FILE_NAME = os.path.join(FOLDER_NAME, competitor_name + ".txt")
     with open(FILE_NAME, "w") as my_file:
-        my_file.write(search_results)
-        my_file.write(f"\n\nRecent Headlines about {competitor_name}:\n")
+        my_file.write(f"Recent Articles about {competitor_name}:\n")
         my_file.write(scrape_results)
 
 
@@ -172,18 +192,11 @@ def analyze_competitors():
     document_id = save_competitors_list_databse(company_name_input, competitors)
 
     for to_analyze_competitor, to_analyze_website in competitors.items():
-        search_results = search_competitor_analysis(
-            to_analyze_competitor, to_analyze_website
-        )
         scrape_results = scrape_competitor_analysis(
             to_analyze_competitor, to_analyze_website
         )
-        # scrape_results = ""
-        # search_results = "Based on the search results, here is a comprehensive summary of the latest news regarding Cohere:\n\n**Strategic Developments:**\n\n* Cohere Health has raised $50 million in equity funding to expand its intelligent prior authorization platform and meet the increasing demand for its solutions. (Source:)\n* Cohere has expanded its partnership with Humana to include diagnostic imaging and sleep services. (Source:)\n\n**Financial Performance:**\n\n* Cohere has raised $500 million in funding, valuing the company at $5 billion. (Source:)\n* The company's annualized revenue run rate has climbed to $22 million, up from $13 million in December. (Source:)\n\n**Product Innovations and Launches:**\n\n* Cohere has launched its new model Command-R, which is designed to compete with ChatGPT. (Source:)\n* The company has also launched its Coral knowledge assistant, a chatbot that can answer employee questions and access internal corporate knowledge bases. (Source:)\n\n**Regulatory and Legal Changes:**\n\n* The Centers for Medicare & Medicaid Services Interoperability and Prior Authorization rule, finalized in January, will require health plans to invest in advanced technology to ensure compliance with federal prior authorization requirements. (Source:)\n\n**Leadership Changes:**\n\n* Aidan Gomez, CEO and co-founder of Cohere, has spoken out against the effective altruism movement, criticizing its dogmatic and self-aggrandizing nature. (Source:)\n\n**Industry Trends and Analysis:**\n\n* Cohere's AI technology is being used to improve patient access to care and reduce prior authorization denial rates. (Source:)\n* The company's focus on scalability and production readiness for enterprises has enabled it to compete with other leading AI companies. (Source:)\n* The use of AI in healthcare is expected to continue to grow, with a focus on improving patient outcomes and reducing costs. (Source:)\n\nOverall, Cohere is making significant strides in the AI and healthcare industries, with a focus on improving patient access to care and reducing prior authorization denial rates. The company's recent funding rounds and product launches have positioned it as a major player in the competitive AI market."
-        save_raw_data_database(
-            to_analyze_competitor, document_id, search_results, scrape_results
-        )
-        save_raw_data_file(to_analyze_competitor, search_results, scrape_results)
+        save_raw_data_database(to_analyze_competitor, document_id, scrape_results)
+        save_raw_data_file(to_analyze_competitor, scrape_results)
 
 
 # STREAMLIT COMPONENTS
@@ -202,20 +215,17 @@ if "competitors" not in st.session_state:
 company_name = st.text_input("Enter company name:")
 st.session_state.company_name = company_name
 
-if st.button("Fetch Competitors"):
-    try:
-        competitors_dict = search_for_competitors(company_name)
-        competitors_dict_final = ast.literal_eval(competitors_dict)
-        st.session_state.competitors.update(competitors_dict_final)
-        st.success(f"Fetched competitors for {company_name}")
-    except:
-        st.error("Error while fetching competitors. Try again or add one manually")
-    # competitors_dict_final = {
-    #     "Lyzr": "www.lyzr.ai",
-    #     "Delineate": "www.delineate.com",
-    #     "Lilac": "www.lilac.ai",
-    #     "VoyagerAnalytics": "www.voyageranalytics.com",
-    # }
+# if st.button("Fetch Competitors"):
+#     # try:
+#     #     competitors_dict = search_for_competitors(company_name)
+#     #     competitors_dict_final = ast.literal_eval(competitors_dict)
+#     #     st.session_state.competitors.update(competitors_dict_final)
+#     #     st.success(f"Fetched competitors for {company_name}")
+#     # except:
+#     #     st.error("Error while fetching competitors. Try again or add one manually")
+#     competitors_dict_final = {"OpenAI": "www.openai.com"}
+#     st.session_state.competitors.update(competitors_dict_final)
+#     st.success(f"Fetched competitors for {company_name}")
 
 
 st.write("## Add a competitor")

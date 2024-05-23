@@ -57,7 +57,7 @@ keys_to_ignore = {
 
 for result in results:
     with st.expander(result["competitor_name"]):
-        st.write("# Email")
+        st.write("# Summary")
         st.write(result["email_report"], unsafe_allow_html=True)
         st.write("# Metrics")
         new_data = {

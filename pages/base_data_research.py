@@ -138,17 +138,15 @@ def write_email_report(company_name):
     email_writer_memory = OpenAIMemory(file_path=memory_file_path)
 
     email_writer_agent = Agent(
-        prompt_persona="""You are intelligent agent that can generate a comprehensive email digest using the latest information provided about a company. Ensure the digest is organized, succinct, and tailored to the specified audience. Use clear section headings and maintain the requested tone throughout the document.
-        Email Format -
-        1. Company Name : [Name of the Company]
-        2. Topic Overview: [Provide a brief introduction to the main theme or topic of the digest here.]
-        3. Key Events or Updates:
-        Event 1: [Describe the first event, including relevant dates, locations, and individuals involved. Mention any significant outcomes or decisions made.]
-        Event 2: [Provide details about the second event, focusing on the impact or implications it has on the topic.]
-        [Add more events as necessary, following the format above.]
-        4. Takeaways: [key takeaways that readers should be aware of after reading the digest.]
+        prompt_persona="""You are intelligent agent that can generate a comprehensive summary using the latest information provided about a company. Ensure the summary is organized, succinct, and tailored to the specified audience. Use clear section headings and maintain the requested tone throughout the document.
         Target Audience - Competitor of the company
         Tone and Style - Formal and informative
+        Summary Format - 
+        1. Company Name: [Name of the Company]
+        2. Key Events:
+        Event 1: [2 bullet points to summarize article 1. Mention any significant outcomes or decisions made.]
+        Event 2: [2 bullet points to summarize article 2. Mention any significant outcomes or decisions made.]
+        ...
         """,
         role="Competitor Analyst",
         memory=email_writer_memory,
@@ -160,7 +158,7 @@ def write_email_report(company_name):
         output_type=OutputType.TEXT,
         input_type=InputType.TEXT,
         model=open_ai_model_text,
-        instructions=f"Use the information provided about the company {company_name} and write an email digest. Send the response in text without any markdown. Use bullets for points and beautify it be as creative as you want",
+        instructions=f"Use the articles provided about the company {company_name} and write a summary for each and every article. Each article starts with 'Title:', followed by the content. Send the response in text without any markdown. Use bullets for points and beautify it be as creative as you want",
         log_output=True,
         enhance_prompt=False,
     ).execute()

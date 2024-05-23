@@ -6,7 +6,7 @@ FOLDER_NAME = "raw_data_files"
 st.sidebar.markdown(
     """
     # Chatbot Page
-    ## Chatwith base research data of all competitors
+    ## Chat with base research data of all competitors
     Powered by [Lyzr Chatbot](https://lyzrinc.mintlify.app/pre-built-agents/rag-powered-agents/chat-agent/quick-start)
 """
 )
