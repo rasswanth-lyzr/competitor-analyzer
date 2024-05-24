@@ -11,7 +11,7 @@ st.sidebar.markdown(
 """
 )
 
-chatbot = ChatBot.txt_chat(input_dir=FOLDER_NAME, recursive=True)
+chatbot = ChatBot.txt_chat(input_dir=FOLDER_NAME, recursive=True, system_prompt="Answer every question in under 100 words")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []

@@ -54,25 +54,12 @@ open_ai_model_text = OpenAIModel(
     },
 )
 
-# perplexity_model_text = PerplexityModel(
-#     api_key=PERPLEXITY_API_KEY,
-#     parameters={
-#         "model": "pplx-7b-online",
-#     },
-# )
-
-
-# def search_for_competitors(company_name):
-#     search_task = Task(
-#         name="Competitors search",
-#         output_type=OutputType.TEXT,
-#         input_type=InputType.TEXT,
-#         model=perplexity_model_text,
-#         instructions=f"Find 5 competitors for the company {company_name} with names and website URLs. Output Format - {{'CompanyA': 'www.companya.com', 'CompanyB': 'www.companyb.com'}}. Return ONLY the dictionary.",
-#         log_output=True,
-#     ).execute()
-
-#     return search_task["choices"][0]["message"]["content"]
+perplexity_model_text = PerplexityModel(
+    api_key=PERPLEXITY_API_KEY,
+    parameters={
+        "model": "pplx-7b-online",
+    },
+)
 
 
 def remove_www(url):
@@ -87,6 +74,19 @@ def format_key(title):
     return key
 
 
+def search_competitor_analysis(company_name, website_name):
+    search_task = Task(
+        name="Website data search",
+        output_type=OutputType.TEXT,
+        input_type=InputType.TEXT,
+        model=perplexity_model_text,
+        instructions=f"Tell me about the company {company_name} - {website_name}",
+        log_output=True,
+    ).execute()
+
+    return search_task["choices"][0]["message"]["content"]
+
+
 def scrape_competitor_analysis(company_name, website_name):
     scraped_data = ""
     google_news = GNews(period="7d", max_results=25)
@@ -99,14 +99,12 @@ def scrape_competitor_analysis(company_name, website_name):
     for news in company_news:
         news_article_list.append(news["title"])
         key = format_key(news["title"])
-        value = news["url"]
-        news_dict[key] = value
+        news_dict[key] = news
 
     for news in website_news:
         news_article_list.append(news["title"])
         key = format_key(news["title"])
-        value = news["url"]
-        news_dict[key] = value
+        news_dict[key] = news
 
     news_picker_agent = Agent(
         prompt_persona="""You are an expert news analyst. You have been given a list of news article headlines about a company. Your task is to identify and return the top 10 headlines that are the most important and impactful.
@@ -138,22 +136,51 @@ Please return the top 10 headlines. If the input has less than 10 headlines, ret
     cleaned_headlines = [format_key(headline.strip()) for headline in headlines_list]
 
     for title in cleaned_headlines:
-        url = news_dict[title]
+        url = news_dict[title]["url"]
+        date = news_dict[title]["published date"]
         try:
             full_article = google_news.get_full_article(url)
             article_title = full_article.title
             article_text = full_article.text
-            scraped_data += "Title: " + article_title + "\n" + article_text + "\n"
+            scraped_data += (
+                "Title: "
+                + article_title
+                + "\nPublished Date: "
+                + date
+                + "\n"
+                + article_text
+                + "\n"
+            )
         except:
             print("Error")
 
     return scraped_data
 
 
+def specific_research_analysis(company_name, website_name, specific_research_area):
+    search_task = Task(
+        name="Specific data search",
+        output_type=OutputType.TEXT,
+        input_type=InputType.TEXT,
+        model=perplexity_model_text,
+        instructions=f"Find detailed information about {specific_research_area} of the company {company_name} - {website_name}",
+        log_output=True,
+    ).execute()
+
+    return search_task["choices"][0]["message"]["content"]
+
+
 def save_raw_data_database(
-    competitor_name, competitors_list_document_id, scrape_results=""
+    competitor_name,
+    competitors_list_document_id,
+    search_results="",
+    scrape_results="",
+    specific_research_results="",
 ):
-    raw_data = f"Recent Articles about {competitor_name}:\n" + scrape_results
+    raw_data = (
+        f"Specific Research:\n{specific_research_results}\nGeneral Research:\n{search_results}\nRecent Articles about {competitor_name}:\n"
+        + scrape_results
+    )
     base_research_document = {
         "competitor_name": competitor_name,
         "competitors_list_document_id": competitors_list_document_id,
@@ -164,11 +191,16 @@ def save_raw_data_database(
     base_research_collection.insert_one(base_research_document)
 
 
-def save_raw_data_file(competitor_name, scrape_results=""):
+def save_raw_data_file(
+    competitor_name, search_results="", scrape_results="", specific_research_results=""
+):
+    raw_data = (
+        f"Specific Research:\n{specific_research_results}\nGeneral Research:\n{search_results}\nRecent Articles about {competitor_name}:\n"
+        + scrape_results
+    )
     FILE_NAME = os.path.join(FOLDER_NAME, competitor_name + ".txt")
     with open(FILE_NAME, "w") as my_file:
-        my_file.write(f"Recent Articles about {competitor_name}:\n")
-        my_file.write(scrape_results)
+        my_file.write(raw_data)
 
 
 def save_competitors_list_databse(company_name_input, competitors):
@@ -185,18 +217,37 @@ def save_competitors_list_databse(company_name_input, competitors):
     return document_id
 
 
-def analyze_competitors():
+def analyze_competitors(specific_research_area=""):
     company_name_input = st.session_state.company_name
     competitors = st.session_state.competitors
 
     document_id = save_competitors_list_databse(company_name_input, competitors)
 
     for to_analyze_competitor, to_analyze_website in competitors.items():
+        specific_research_results = ""
+        if specific_research_area != "":
+            specific_research_results = specific_research_analysis(
+                to_analyze_competitor, to_analyze_website, specific_research_area
+            )
+        search_results = search_competitor_analysis(
+            to_analyze_competitor, to_analyze_website
+        )
         scrape_results = scrape_competitor_analysis(
             to_analyze_competitor, to_analyze_website
         )
-        save_raw_data_database(to_analyze_competitor, document_id, scrape_results)
-        save_raw_data_file(to_analyze_competitor, scrape_results)
+        save_raw_data_database(
+            to_analyze_competitor,
+            document_id,
+            search_results,
+            scrape_results,
+            specific_research_results,
+        )
+        save_raw_data_file(
+            to_analyze_competitor,
+            search_results,
+            scrape_results,
+            specific_research_results,
+        )
 
 
 # STREAMLIT COMPONENTS
@@ -212,29 +263,22 @@ def display_competitors():
 if "competitors" not in st.session_state:
     st.session_state.competitors = {}
 
-company_name = st.text_input("Enter company name:")
+company_name = st.text_input("Enter your company name:")
 st.session_state.company_name = company_name
-
-# if st.button("Fetch Competitors"):
-#     # try:
-#     #     competitors_dict = search_for_competitors(company_name)
-#     #     competitors_dict_final = ast.literal_eval(competitors_dict)
-#     #     st.session_state.competitors.update(competitors_dict_final)
-#     #     st.success(f"Fetched competitors for {company_name}")
-#     # except:
-#     #     st.error("Error while fetching competitors. Try again or add one manually")
-#     competitors_dict_final = {"OpenAI": "www.openai.com"}
-#     st.session_state.competitors.update(competitors_dict_final)
-#     st.success(f"Fetched competitors for {company_name}")
-
 
 st.write("## Add a competitor")
 col1, col2 = st.columns(2)
 with col1:
-    new_company_name = st.text_input("Enter new company name:")
+    new_company_name = st.text_input("Enter competitor name:")
 
 with col2:
-    new_company_website = st.text_input("Enter new company website:")
+    new_company_website = st.text_input("Enter competitor website:")
+
+specific_research_area = st.text_input(
+    "Specific area to focus for research (OPTIONAL)",
+    value="",
+    placeholder="Sales Strategy",
+)
 
 if st.button("Add Competitor"):
     if new_company_name and new_company_website:
@@ -258,7 +302,7 @@ display_competitors()
 
 if st.button("Submit Competitors for Analysis", type="primary"):
     create_folder()
-    analyze_competitors()
+    analyze_competitors(specific_research_area.strip())
     st.write(
         """
         # Analysis complete! :star:

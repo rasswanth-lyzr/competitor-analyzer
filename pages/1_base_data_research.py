@@ -153,9 +153,15 @@ def write_email_report(company_name):
         Summary Format - 
         1. Company Name: [Name of the Company]
         2. Key Events:
-        Event 1: [2 bullet points to summarize article 1. Mention any significant outcomes or decisions made.]
-        Event 2: [2 bullet points to summarize article 2. Mention any significant outcomes or decisions made.]
+        Article 1: [Title]
+        [Published Date]
+        [2 bullet points to summarize article 1]
+        Article 2: [Title]
+        [Published Date]
+        [2 bullet points to summarize article 2]
         ...
+        3. General Research: [Summary of General Research]
+        4. IF, Specific Research: [Summary of Specific Reseach]
         """,
         role="Competitor Analyst",
         memory=email_writer_memory,
@@ -167,7 +173,7 @@ def write_email_report(company_name):
         output_type=OutputType.TEXT,
         input_type=InputType.TEXT,
         model=open_ai_model_text,
-        instructions=f"Use the articles provided about the company {company_name} and write a summary for each and every article. Each article starts with 'Title:', followed by the content. Send the response in text without any markdown. Use bullets for points and beautify it be as creative as you want",
+        instructions=f"Use the articles provided about the company {company_name} and write a summary for each and every article. Each article starts with 'Title:', followed by the content. If Specific Reserach and General Research is present, write a summary about them. Send the response in text without any markdown. Use bullets for points and beautify it be as creative as you want",
         log_output=True,
         enhance_prompt=False,
     ).execute()
