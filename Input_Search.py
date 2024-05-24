@@ -19,7 +19,7 @@ st.set_page_config(layout="wide")
 
 st.sidebar.markdown(
     """ 
-    # Main Page
+    # Meet Alan! :sunglasses:
     1. Get a list of your competitors
     2. Gather base research data for them
 """
@@ -264,6 +264,8 @@ def display_competitors():
 
 if "competitors" not in st.session_state:
     st.session_state.competitors = {}
+
+st.image("Alan.png")
 
 company_name = st.text_input("Enter your company name:")
 st.session_state.company_name = company_name
