@@ -276,12 +276,6 @@ with col1:
 with col2:
     new_company_website = st.text_input("Enter competitor website:")
 
-specific_research_area = st.text_input(
-    "Specific area to focus for research (OPTIONAL)",
-    value="",
-    placeholder="Sales Strategy",
-)
-
 if st.button("Add Competitor"):
     if new_company_name and new_company_website:
         st.session_state.competitors[new_company_name] = new_company_website
@@ -300,6 +294,12 @@ if st.button("Delete Competitor"):
         del st.session_state.competitors[key]
         st.success("Deleted!")
 
+specific_research_area = st.text_input(
+    "Specific area to focus for research *(OPTIONAL)*",
+    value="",
+    placeholder="Eg. Sales Strategy",
+)
+
 display_competitors()
 
 if st.button("Submit Competitors for Analysis", type="primary"):
@@ -308,6 +308,6 @@ if st.button("Submit Competitors for Analysis", type="primary"):
     st.write(
         """
         # Analysis complete! :star:
-        ### Go to :red[Base Data Research] Page"""
+        ### Go to :red[Research Data] Page"""
     )
-    st.page_link("pages/1_base_data_research.py", label="Base Data Research", icon="📊")
+    st.page_link("pages/1_Research_Data.py", label="Research Data", icon="📊")

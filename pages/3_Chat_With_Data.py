@@ -13,6 +13,8 @@ st.sidebar.markdown(
 """
 )
 
+st.header("Chat with Research Data")
+
 chatbot = ChatBot.txt_chat(
     input_dir=FOLDER_NAME,
     recursive=True,
