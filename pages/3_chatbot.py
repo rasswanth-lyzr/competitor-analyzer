@@ -3,6 +3,8 @@ from lyzr import ChatBot
 
 FOLDER_NAME = "raw_data_files"
 
+st.set_page_config(layout="wide")
+
 st.sidebar.markdown(
     """
     # Chatbot Page
@@ -11,7 +13,11 @@ st.sidebar.markdown(
 """
 )
 
-chatbot = ChatBot.txt_chat(input_dir=FOLDER_NAME, recursive=True, system_prompt="Answer every question in under 100 words")
+chatbot = ChatBot.txt_chat(
+    input_dir=FOLDER_NAME,
+    recursive=True,
+    system_prompt="Answer every question in under 100 words",
+)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []

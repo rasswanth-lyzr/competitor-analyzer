@@ -19,6 +19,8 @@ from database import (
     news_collection,
 )
 
+st.set_page_config(layout="wide")
+
 st.sidebar.markdown(
     """
     # Base Data Research Page
@@ -221,7 +223,7 @@ def save_metrics_data_file(metrics_data, competitor_name):
             if key in list(metrics_dict.keys()):
                 my_file.write(metrics_dict[key] + ": " + str(value) + "\n")
             else:
-                my_file.write(key + ": " + value  + "\n")
+                my_file.write(key + ": " + value + "\n")
 
 
 # STREAMLIT COMPONENTS

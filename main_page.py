@@ -15,6 +15,8 @@ from lyzr_automata.tasks.task_literals import InputType, OutputType
 
 from database import base_research_collection, competitors_list_collection
 
+st.set_page_config(layout="wide")
+
 st.sidebar.markdown(
     """ 
     # Main Page

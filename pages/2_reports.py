@@ -2,6 +2,8 @@ import streamlit as st
 
 from database import metrics_collection, news_collection
 
+st.set_page_config(layout="wide")
+
 st.sidebar.markdown(
     """ 
     **Reports Page**
