@@ -176,7 +176,7 @@ def write_email_report(company_name):
         output_type=OutputType.TEXT,
         input_type=InputType.TEXT,
         model=open_ai_model_text,
-        instructions=f"Use the articles provided about the company {company_name} and write a summary for each and every article. Each article starts with 'Title:', followed by the content. If Specific Research or General Research is present, write a summary about them. Send the response in text without any markdown. Use bullets for points and beautify it be as creative as you want",
+        instructions=f"Use the articles provided about the company {company_name} and write a summary for each and every article. Each article starts with 'Title:', followed by the content. If Specific Research or General Research is present, write a summary about them. If Specific Research or General Research is NOT present, do not generate anything. Send the response in text without any markdown. Use bullets for points and beautify it be as creative as you want",
         log_output=True,
         enhance_prompt=False,
     ).execute()
@@ -279,7 +279,7 @@ fields = [
     "Stock Ticker",
 ]
 st.write("### Select required metrics")
-metrics_list_values = [field for field in fields if st.checkbox(field)]
+metrics_list_values = [field for field in fields if st.checkbox(field, value=True)]
 
 report_button = st.button("Generate report")
 if report_button:

@@ -18,10 +18,15 @@ document_id = st.session_state["document_id"]
 pipeline = [
     {"$match": {"competitors_list_document_id": document_id}},
     {
+        "$sort": {
+            "created_at": -1
+        }  # Sort the metrics_collection by 'created_at' in descending order
+    },
+    {"$limit": 1},
+    {
         "$lookup": {
             "from": "news",
             "let": {
-                "base_id": "$base_research_document_id",
                 "comp_name": "$competitor_name",
             },
             "pipeline": [
@@ -29,12 +34,15 @@ pipeline = [
                     "$match": {
                         "$expr": {
                             "$and": [
-                                {"$eq": ["$base_research_document_id", "$$base_id"]},
                                 {"$eq": ["$competitor_name", "$$comp_name"]},
                             ]
                         }
                     }
                 },
+                {
+                    "$sort": {"created_at": -1}
+                },  # Sort by 'created_at' in descending order
+                {"$limit": 1},  # Limit to the latest record
                 {"$project": {"email_report": 1, "_id": 0}},
             ],
             "as": "news_data",
