@@ -54,9 +54,10 @@ perplexity_model_text = PerplexityModel(
 )
 
 
-def process_data(
-    row, competitors_list_document_id, metrics_list_values, metrics_list_keys
-):
+def process_data(row, competitors_list_document_id):
+    metrics_dict = st.session_state.metrics_dict
+    metrics_list_keys = list(metrics_dict.keys())
+    metrics_list_keys = list(metrics_dict.values())
     competitor_name = row["competitor_name"]
     base_research_document_id = row["id"]
     website = row["website"]
@@ -223,7 +224,7 @@ def save_metrics_data_file(metrics_data, competitor_name):
             if key in list(metrics_dict.keys()):
                 my_file.write(metrics_dict[key] + ": " + str(value) + "\n")
             else:
-                my_file.write(key + ": " + value + "\n")
+                my_file.write(key + ": " + str(value) + "\n")
 
 
 # STREAMLIT COMPONENTS
@@ -255,38 +256,47 @@ dataframe_dict = {
     "raw_data": raw_data_column,
 }
 df = pd.DataFrame(dataframe_dict)
+df.index = df.index + 1
 st.dataframe(df, column_config={"id": None})
 
+st.write("### Generate report for")
 generate_report_list = st.multiselect(
-    "Generate Report for", options=competitor_name_column
+    "Generate Report for", options=competitor_name_column,label_visibility="collapsed"
 )
 
-metrics_values = st.text_input(
-    "Enter metrics required",
-    value="Website, Sector, Industry, Location, Number of Employees, Founding Year, Company Type, Market Cap, Annual Revenue, LinkedIn URL, Tagline, Stock Ticker",
-)
-metrics_list_values = metrics_values.split(",")
-
-metrics_dict = {}
-for name in metrics_list_values:
-    key_value = convert_field_name_advanced(name.strip())
-    metrics_dict[key_value] = name.strip()
-
-metrics_list_keys = list(metrics_dict.keys())
-
-st.session_state.metrics_dict = metrics_dict
+fields = [
+    "Website URL",
+    "Sector",
+    "Industry",
+    "Location",
+    "Number of Employees",
+    "Founding Year",
+    "Company Type",
+    "Market Cap",
+    "Annual Revenue",
+    "LinkedIn URL",
+    "Tagline",
+    "Stock Ticker",
+]
+st.write("### Select required metrics")
+metrics_list_values = [field for field in fields if st.checkbox(field)]
 
 report_button = st.button("Generate report")
 if report_button:
+    if metrics_list_values:
+        metrics_dict = {}
+        for name in metrics_list_values:
+            key_value = convert_field_name_advanced(name.strip())
+            metrics_dict[key_value] = name.strip()
+
+        st.session_state.metrics_dict = metrics_dict
+    else:
+        st.error("No fields selected.")
     filtered_dataframe = df[df["competitor_name"].isin(generate_report_list)]
     filtered_dataframe.apply(
         process_data,
         axis=1,
-        args=(
-            document_id,
-            metrics_list_values,
-            metrics_list_keys,
-        ),
+        args=(document_id,),
     )
 
     st.write(
