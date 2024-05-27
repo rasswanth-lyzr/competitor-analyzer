@@ -115,9 +115,9 @@ Consider the following criteria when evaluating each headline:
 - Relevance: How directly the headline pertains to significant events or developments related to the company (e.g., major financial moves, significant product launches, legal issues, executive changes, etc.).
 - Impact: The potential effect of the news on the company's operations, stock price, public perception, or industry standing.
 
-OUTPUT FORMAT - A list containing the headlines - ["Headline 1", "Headline 2", ...]
+OUTPUT FORMAT - A list containing the headlines - [Headline 1, Headline 2, ...]
 
-Please return the top 10 headlines. If the input has less than 10 headlines, return all. Make sure all the headlines are within double quotes.
+Please return the top 10 headlines. If the input has less than 10 headlines, return all. Make sure all the headlines are returned in the same format as input.
 """,
         role="News picker",
     )
@@ -133,6 +133,8 @@ Please return the top 10 headlines. If the input has less than 10 headlines, ret
         enhance_prompt=False,
         default_input=news_article_list,
     ).execute()
+
+    breakpoint()
 
     headlines_list = ast.literal_eval(news_picker_task)
     cleaned_headlines = [format_key(headline.strip()) for headline in headlines_list]
@@ -310,6 +312,6 @@ if st.button("Submit Competitors for Analysis", type="primary"):
     st.write(
         """
         # Analysis complete! :star:
-        ### Go to :red[Research Data] Page"""
+        ### Go to :red[Generate Report] Page"""
     )
-    st.page_link("pages/1_Research_Data.py", label="Research Data", icon="📊")
+    st.page_link("pages/1_Generate_Report.py", label="Generate Report", icon="📊")

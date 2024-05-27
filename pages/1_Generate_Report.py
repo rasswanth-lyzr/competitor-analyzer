@@ -302,8 +302,8 @@ if report_button:
     st.write(
         """
         # Report generated! :sparkles:
-        ### Go to :red[Reports] Page"""
+        ### Go to :red[Access Reports] Page"""
     )
-    st.page_link("pages/2_View_Report.py", label="Reports", icon="📁")
-    st.write("### To chat with the data, go to :red[Chat] page")
-    st.page_link("pages/3_Chat_With_Data.py", label="Chat", icon="🤖")
+    st.page_link("pages/2_Access_Reports.py", label="Access Reports", icon="📁")
+    st.write("### To chat with the data, go to :red[Chat With Knowledge Base] page")
+    st.page_link("pages/3_Chat_With_Knowledge_Base.py", label="Chat With Knowledge Base", icon="🤖")
