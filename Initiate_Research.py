@@ -59,7 +59,7 @@ open_ai_model_text = OpenAIModel(
 perplexity_model_text = PerplexityModel(
     api_key=PERPLEXITY_API_KEY,
     parameters={
-        "model": "pplx-7b-online",
+        "model": "llama-3-sonar-small-32k-online",
     },
 )
 
@@ -268,7 +268,6 @@ if "competitors" not in st.session_state:
 st.image("Alan.png")
 
 company_name = st.text_input("Enter your company name:")
-st.session_state.company_name = company_name
 
 st.write("## Add a competitor")
 col1, col2 = st.columns(2)
@@ -305,6 +304,7 @@ specific_research_area = st.text_input(
 display_competitors()
 
 if st.button("Submit Competitors for Analysis", type="primary"):
+    st.session_state.company_name = company_name
     create_folder()
     analyze_competitors(specific_research_area.strip())
     st.write(

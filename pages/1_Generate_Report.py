@@ -49,7 +49,7 @@ open_ai_model_text = OpenAIModel(
 perplexity_model_text = PerplexityModel(
     api_key=PERPLEXITY_API_KEY,
     parameters={
-        "model": "pplx-7b-online",
+        "model": "llama-3-sonar-small-32k-online",
     },
 )
 
