@@ -6,7 +6,6 @@ import uuid
 import requests
 import streamlit as st
 from dotenv import load_dotenv
-from fpdf import FPDF
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
