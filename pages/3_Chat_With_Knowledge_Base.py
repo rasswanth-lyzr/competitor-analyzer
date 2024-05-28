@@ -1,7 +1,21 @@
-import streamlit as st
-from lyzr import ChatBot
+import os
+import time
 
+import streamlit as st
+from dotenv import load_dotenv
+
+from chatbot_helper import (
+    chat_with_chatbot,
+    convert_txt_to_pdf,
+    create_conversation,
+    create_new_chatbot,
+    find_files,
+    train_chatbot,
+)
+
+load_dotenv()
 FOLDER_NAME = "raw_data_files"
+USER_ID = os.getenv("USER_ID")
 
 st.set_page_config(layout="wide")
 
@@ -15,11 +29,28 @@ st.sidebar.markdown(
 
 st.header("Chat with Research Data")
 
-chatbot = ChatBot.txt_chat(
-    input_dir=FOLDER_NAME,
-    recursive=True,
-    system_prompt="Answer every question in under 100 words",
-)
+
+@st.cache_data
+def initialize_chatbot():
+    chatbot_id = create_new_chatbot()
+    # USER_ID = create_user()
+    time.sleep(10)
+    pdf_files = find_files()
+    time.sleep(10)
+    train_chatbot(chatbot_id, pdf_files)
+    conversation_id = create_conversation(USER_ID, chatbot_id)
+    return chatbot_id, conversation_id
+
+
+convert_txt_to_pdf()
+chatbot_id, conversation_id = initialize_chatbot()
+
+with st.sidebar:
+    st.markdown("## *To retrain the chatbot, click here*")
+    retrain = st.button("Retrain", type="primary")
+    if retrain:
+        pdf_files = find_files()
+        train_chatbot(chatbot_id, pdf_files)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -32,7 +63,7 @@ prompt = st.chat_input("Ask a question")
 if prompt:
     st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
-    response = chatbot.chat(prompt).response
+    response = chat_with_chatbot(conversation_id, prompt)
     with st.chat_message("assistant"):
         st.markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})

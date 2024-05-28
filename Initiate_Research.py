@@ -109,7 +109,7 @@ def scrape_competitor_analysis(company_name, website_name):
         news_dict[key] = news
 
     news_picker_agent = Agent(
-        prompt_persona=f"""You are an expert news analyst. You have been given a list of news article headlines about the company {company_name}. Your task is to identify and return the top 10 headlines that are the most important and impactful.
+        prompt_persona=f"""You are an expert news analyst. You have been given a list of news article headlines about a company. Your task is to identify and return the top 10 headlines that are the most important and impactful.
 Consider the following criteria when evaluating each headline:
 - Uniqueness: Avoid selecting multiple headlines that discuss the same event or topic. Each of the top 10 headlines should cover a distinct and different event or aspect.
 - Relevance: How directly the headline pertains to significant events or developments related to the company (e.g., major financial moves, significant product launches, legal issues, executive changes, etc.).
@@ -133,8 +133,6 @@ Please return the top 10 headlines. If the input has less than 10 headlines, ret
         enhance_prompt=False,
         default_input=news_article_list,
     ).execute()
-
-    breakpoint()
 
     headlines_list = ast.literal_eval(news_picker_task)
     cleaned_headlines = [format_key(headline.strip()) for headline in headlines_list]
