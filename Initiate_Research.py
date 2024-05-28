@@ -115,7 +115,7 @@ Consider the following criteria when evaluating each headline:
 - Relevance: How directly the headline pertains to significant events or developments related to the company (e.g., major financial moves, significant product launches, legal issues, executive changes, etc.).
 - Impact: The potential effect of the news on the company's operations, stock price, public perception, or industry standing.
 
-OUTPUT FORMAT - A list containing the headlines - [Headline 1, Headline 2, ...]
+OUTPUT FORMAT - A list containing the headlines - [Headline 1, Headline 2, ...] - Output the list of articles in a Python-friendly format, with each item in the list properly enclosed in quotes and the entire list enclosed in square brackets.Do not include any additional tags or language indicators.
 
 Please return the top 10 headlines. If the input has less than 10 headlines, return all. Make sure all the headlines are returned in the same format as input.
 """,
