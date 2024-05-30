@@ -15,14 +15,15 @@ from lyzr_automata.tasks.task_literals import InputType, OutputType
 
 from database import base_research_collection, competitors_list_collection
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", page_title="Alan - The Business Analyst")
 
+st.sidebar.title("Try Alan’s Capabilities")
 st.sidebar.markdown(
-    """ 
-    # Meet Alan! :sunglasses:
-    1. Get a list of your competitors
-    2. Gather base research data for them
-"""
+    "<small>Alan can do a thorough research about your customer or competitor and generate a detailed report, on a daily or weekly basis. Alan looks up information in the internet (powered by Perplexity), news (powered by Google news) and also scraps their website.</small>",
+    unsafe_allow_html=True,
+)
+st.sidebar.markdown(
+    "Learn more about [Alan](https://www.lyzr.ai/book-demo/)", unsafe_allow_html=True
 )
 
 load_dotenv()
@@ -267,43 +268,42 @@ if "competitors" not in st.session_state:
 
 st.image("Alan.png")
 
-company_name = st.text_input("Enter your company name:")
+company_name = st.text_input("Enter your company name")
 
-st.write("## Add a competitor")
+st.write("## Add a competitor/customer")
 col1, col2 = st.columns(2)
 with col1:
-    new_company_name = st.text_input("Enter competitor name:")
+    new_company_name = st.text_input("Enter company name")
 
 with col2:
-    new_company_website = st.text_input("Enter competitor website:")
+    new_company_website = st.text_input("Enter company website")
 
 if st.button("Add Competitor"):
     if new_company_name and new_company_website:
         st.session_state.competitors[new_company_name] = new_company_website
-        st.success(f"Added competitor: {new_company_name}")
     else:
         st.error("Missing fields")
 
-st.write("## Delete a competitor")
-competitors_options = [key for key in st.session_state.competitors]
-options = st.multiselect(
-    "Pick competitors to delete",
-    competitors_options,
-)
-if st.button("Delete Competitor"):
-    for key in options:
-        del st.session_state.competitors[key]
-        st.success("Deleted!")
+# st.write("## Delete a competitor")
+# competitors_options = [key for key in st.session_state.competitors]
+# options = st.multiselect(
+#     "Pick competitors to delete",
+#     competitors_options,
+# )
+# if st.button("Delete Competitor"):
+#     for key in options:
+#         del st.session_state.competitors[key]
+#         st.success("Deleted!")
 
 specific_research_area = st.text_input(
-    "Specific area to focus for research *(OPTIONAL)*",
+    "Specific area of focus for the research *(OPTIONAL)*",
     value="",
-    placeholder="Eg. Sales Strategy",
+    placeholder="Eg. Research about their growth strategy and customer aqcuisation channel",
 )
 
 display_competitors()
 
-if st.button("Submit Competitors for Analysis", type="primary"):
+if st.button("Initiate Analysis", type="primary"):
     st.session_state.company_name = company_name
     create_folder()
     analyze_competitors(specific_research_area.strip())

@@ -2,17 +2,22 @@ import streamlit as st
 
 from database import metrics_collection, news_collection
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", page_title="Alan - The Business Analyst")
 
+st.sidebar.title("Try Alan’s Capabilities")
 st.sidebar.markdown(
-    """ 
-    **Reports Page**
-
-    1. View all generated reports
-"""
+    "<small>Alan can do a thorough research about your customer or competitor and generate a detailed report, on a daily or weekly basis. Alan looks up information in the internet (powered by Perplexity), news (powered by Google news) and also scraps their website.</small>",
+    unsafe_allow_html=True,
+)
+st.sidebar.markdown(
+    "Learn more about [Alan](https://www.lyzr.ai/book-demo/)", unsafe_allow_html=True
 )
 
-document_id = st.session_state["document_id"]
+try:
+    document_id = st.session_state["document_id"]
+except:
+    st.error("Please complete Generate Report step!")
+    st.stop()
 
 
 pipeline = [
@@ -65,6 +70,7 @@ keys_to_ignore = {
     "email_report",
 }
 
+st.header("View all generated reports")
 for result in results:
     with st.expander(result["competitor_name"]):
         st.write("# Summary")

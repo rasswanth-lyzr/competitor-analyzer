@@ -19,7 +19,11 @@ VECTOR_STORE_API_KEY = os.getenv("VECTOR_STORE_API_KEY")
 
 HEADERS = {"Authorization": f"Bearer {CHATBOT_BEARER_TOKEN}"}
 
-company_name_input = st.session_state.company_name
+try:
+    company_name_input = st.session_state.company_name
+except:
+    st.error("Please complete Initiate Research and Generate Report step!")
+    st.stop()
 
 
 def generate_new_uuid():

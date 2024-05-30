@@ -17,12 +17,11 @@ load_dotenv()
 FOLDER_NAME = "raw_data_files"
 USER_ID = os.getenv("USER_ID")
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", page_title="Alan - The Business Analyst")
 
 st.sidebar.markdown(
     """
-    # Chatbot Page
-    ## Chat with base research data of all competitors
+    ## Chat with research data of all competitors
     Powered by [Lyzr Chatbot](https://lyzrinc.mintlify.app/pre-built-agents/rag-powered-agents/chat-agent/quick-start)
 """
 )
@@ -46,7 +45,7 @@ convert_txt_to_pdf()
 chatbot_id, conversation_id = initialize_chatbot()
 
 with st.sidebar:
-    st.markdown("## *To retrain the chatbot, click here*")
+    st.markdown("### *To retrain the chatbot, click here*")
     retrain = st.button("Retrain", type="primary")
     if retrain:
         pdf_files = find_files()

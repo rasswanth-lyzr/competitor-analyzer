@@ -19,14 +19,15 @@ from database import (
     news_collection,
 )
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", page_title="Alan - The Business Analyst")
 
+st.sidebar.title("Try Alan’s Capabilities")
 st.sidebar.markdown(
-    """
-    # Base Data Research Page
-    1. View your base research data
-    2. Generate report for competitor
-"""
+    "<small>Alan can do a thorough research about your customer or competitor and generate a detailed report, on a daily or weekly basis. Alan looks up information in the internet (powered by Perplexity), news (powered by Google news) and also scraps their website.</small>",
+    unsafe_allow_html=True,
+)
+st.sidebar.markdown(
+    "Learn more about [Alan](https://www.lyzr.ai/book-demo/)", unsafe_allow_html=True
 )
 
 load_dotenv()
@@ -228,8 +229,14 @@ def save_metrics_data_file(metrics_data, competitor_name):
 
 
 # STREAMLIT COMPONENTS
+try:
+    document_id = st.session_state["document_id"]
+except:
+    st.error("Please complete Initiate Research step!")
+    st.stop()
 
-document_id = st.session_state["document_id"]
+st.header("View your research data")
+
 result1 = competitors_list_collection.find_one({"_id": document_id})
 competitors_list = result1["generated_competitors_list"]
 
@@ -259,9 +266,9 @@ df = pd.DataFrame(dataframe_dict)
 df.index = df.index + 1
 st.dataframe(df, column_config={"id": None})
 
-st.write("### Generate report for")
+st.write("## Generate report for")
 generate_report_list = st.multiselect(
-    "Generate Report for", options=competitor_name_column,label_visibility="collapsed"
+    "Generate Report for", options=competitor_name_column, label_visibility="collapsed"
 )
 
 fields = [
@@ -278,7 +285,7 @@ fields = [
     "Tagline",
     "Stock Ticker",
 ]
-st.write("### Select required metrics")
+st.write("## Select required metrics")
 metrics_list_values = [field for field in fields if st.checkbox(field, value=True)]
 
 report_button = st.button("Generate report")
@@ -306,4 +313,8 @@ if report_button:
     )
     st.page_link("pages/2_Access_Reports.py", label="Access Reports", icon="📁")
     st.write("### To chat with the data, go to :red[Chat With Knowledge Base] page")
-    st.page_link("pages/3_Chat_With_Knowledge_Base.py", label="Chat With Knowledge Base", icon="🤖")
+    st.page_link(
+        "pages/3_Chat_With_Knowledge_Base.py",
+        label="Chat With Knowledge Base",
+        icon="🤖",
+    )
