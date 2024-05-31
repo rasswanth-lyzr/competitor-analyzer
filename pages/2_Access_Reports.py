@@ -92,9 +92,15 @@ def save_report(result):
             metrics_text_content += f"- {metrics_dict[key]}: {value} \n"
         else:
             metrics_text_content += f"- {key}: {value} \n"
+    email_content = result["email_report"]
+    cont = email_content.encode('latin-1', errors='replace')
+    cont_decoded = cont.decode('utf-8')
+
+    metrics_text_content_replaced = metrics_text_content.encode('latin-1', errors='replace')
+    metrics_text_content_decoded = metrics_text_content_replaced.decode('utf-8')
 
     text_content = (
-        "Summary\n\n" + result["email_report"] + "\n\nMetrics\n" + metrics_text_content
+        "Summary\n\n" + cont_decoded + "\n\nMetrics\n" + metrics_text_content_decoded
     )
     pdf.multi_cell(0, 10, text_content)
     pdf.output(FILE_NAME)
