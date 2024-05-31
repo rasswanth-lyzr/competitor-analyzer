@@ -8,3 +8,4 @@ gnews==0.3.7
 newspaper4k
 lyzr==0.1.38
 reportlab==4.2.0
+fpdf==1.7.2

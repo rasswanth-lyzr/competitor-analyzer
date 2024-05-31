@@ -1,6 +1,7 @@
 import os
 
 import streamlit as st
+from fpdf import FPDF
 
 from database import metrics_collection, news_collection
 
@@ -76,22 +77,27 @@ keys_to_ignore = {
 
 
 def save_report(result):
+    FILE_NAME = os.path.join(REPORT_FOLDER_NAME, result["competitor_name"] + ".pdf")
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
 
-    FILE_NAME = os.path.join(REPORT_FOLDER_NAME, result["competitor_name"] + ".txt")
-    with open(FILE_NAME, "w") as my_file:
-        my_file.write("Summary\n")
-        my_file.write(result["email_report"])
-        my_file.write("\nMetrics")
-        new_data = {
-            key: value for key, value in result.items() if key not in keys_to_ignore
-        }
-        metrics_dict = st.session_state.metrics_dict
-        for key, value in new_data.items():
-            if key in list(metrics_dict.keys()):
-                my_file.write(f"- {metrics_dict[key]}: {value}")
-            else:
-                my_file.write(f"- {key}: {value}")
+    metrics_text_content = ""
+    new_data = {
+        key: value for key, value in result.items() if key not in keys_to_ignore
+    }
+    metrics_dict = st.session_state.metrics_dict
+    for key, value in new_data.items():
+        if key in list(metrics_dict.keys()):
+            metrics_text_content += f"- {metrics_dict[key]}: {value} \n"
+        else:
+            metrics_text_content += f"- {key}: {value} \n"
 
+    text_content = (
+        "Summary\n\n" + result["email_report"] + "\n\nMetrics\n" + metrics_text_content
+    )
+    pdf.multi_cell(0, 10, text_content)
+    pdf.output(FILE_NAME)
     return FILE_NAME
 
 
@@ -112,5 +118,5 @@ for result in results:
             else:
                 st.write(f"- **{key}**: {value}")
 
-        with open(file_path) as file:
-            st.download_button("Download file", data=file, file_name=file_path)
+        with open(file_path, "rb") as file:
+            st.download_button("Download file", data=file, file_name=file_path, mime='application/octet-stream')
