@@ -45,10 +45,10 @@ def create_folder():
 
     os.makedirs(FOLDER_NAME)
 
-    if os.path.exists(FOLDER_NAME):
-        shutil.rmtree(FOLDER_NAME)
+    if os.path.exists(REPORT_FOLDER_NAME):
+        shutil.rmtree(REPORT_FOLDER_NAME)
 
-    os.makedirs(FOLDER_NAME)
+    os.makedirs(REPORT_FOLDER_NAME)
 
     if os.path.exists(AGENTS_FILE):
         os.remove(AGENTS_FILE)
