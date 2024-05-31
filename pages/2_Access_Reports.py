@@ -1,6 +1,10 @@
+import os
+
 import streamlit as st
 
 from database import metrics_collection, news_collection
+
+REPORT_FOLDER_NAME = "reports"
 
 st.set_page_config(layout="wide", page_title="Alan - The Business Analyst")
 
@@ -70,9 +74,31 @@ keys_to_ignore = {
     "email_report",
 }
 
+
+def save_report(result):
+
+    FILE_NAME = os.path.join(REPORT_FOLDER_NAME, result["competitor_name"] + ".txt")
+    with open(FILE_NAME, "w") as my_file:
+        my_file.write("Summary\n")
+        my_file.write(result["email_report"])
+        my_file.write("\nMetrics")
+        new_data = {
+            key: value for key, value in result.items() if key not in keys_to_ignore
+        }
+        metrics_dict = st.session_state.metrics_dict
+        for key, value in new_data.items():
+            if key in list(metrics_dict.keys()):
+                my_file.write(f"- {metrics_dict[key]}: {value}")
+            else:
+                my_file.write(f"- {key}: {value}")
+
+    return FILE_NAME
+
+
 st.header("View all generated reports")
 for result in results:
     with st.expander(result["competitor_name"]):
+        file_path = save_report(result)
         st.write("# Summary")
         st.write(result["email_report"])
         st.write("# Metrics")
@@ -85,3 +111,6 @@ for result in results:
                 st.write(f"- **{metrics_dict[key]}**: {value}")
             else:
                 st.write(f"- **{key}**: {value}")
+
+        with open(file_path) as file:
+            st.download_button("Download file", data=file, file_name=file_path)

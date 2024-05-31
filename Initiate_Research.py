@@ -35,10 +35,16 @@ PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
 
 FOLDER_NAME = "raw_data_files"
 AGENTS_FILE = "assistant_ids.json"
+REPORT_FOLDER_NAME = "reports"
 
 
 # FUNCTIONS
 def create_folder():
+    if os.path.exists(FOLDER_NAME):
+        shutil.rmtree(FOLDER_NAME)
+
+    os.makedirs(FOLDER_NAME)
+
     if os.path.exists(FOLDER_NAME):
         shutil.rmtree(FOLDER_NAME)
 
