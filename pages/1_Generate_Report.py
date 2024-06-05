@@ -165,7 +165,8 @@ def write_email_report(company_name):
         [2 bullet points to summarize article 2]
         ...
         3. General Research: [Summary of General Research]
-        4. Specific Research: [Summary of Specific Reseach]
+        IF Specific Research section is present,
+            4. Specific Research: [Summary of Specific Reseach]
         """,
         role="Competitor Analyst",
         memory=email_writer_memory,

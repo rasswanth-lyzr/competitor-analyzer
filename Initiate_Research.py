@@ -186,8 +186,13 @@ def save_raw_data_database(
     scrape_results="",
     specific_research_results="",
 ):
+    specific_research_raw_data = ""
+    if specific_research_results:
+        specific_research_raw_data = (
+            f"Specific Research:\n{specific_research_results}\n"
+        )
     raw_data = (
-        f"Specific Research:\n{specific_research_results}\nGeneral Research:\n{search_results}\nRecent Articles about {competitor_name}:\n"
+        f"{specific_research_raw_data}General Research:\n{search_results}\nRecent Articles about {competitor_name}:\n"
         + scrape_results
     )
     base_research_document = {
@@ -203,8 +208,13 @@ def save_raw_data_database(
 def save_raw_data_file(
     competitor_name, search_results="", scrape_results="", specific_research_results=""
 ):
+    specific_research_raw_data = ""
+    if specific_research_results:
+        specific_research_raw_data = (
+            f"Specific Research:\n{specific_research_results}\n"
+        )
     raw_data = (
-        f"Specific Research:\n{specific_research_results}\nGeneral Research:\n{search_results}\nRecent Articles about {competitor_name}:\n"
+        f"{specific_research_raw_data}General Research:\n{search_results}\nRecent Articles about {competitor_name}:\n"
         + scrape_results
     )
     FILE_NAME = os.path.join(FOLDER_NAME, competitor_name + ".txt")
