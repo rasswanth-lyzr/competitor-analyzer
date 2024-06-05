@@ -1,4 +1,4 @@
-git+https://github.com/LyzrCore/lyzr-automata.git@10565fc0525d3d55206eb12f6198316f267b79df
+git+https://github.com/LyzrCore/lyzr-automata.git@b6794a003f68e4fdb784c18d684b856c5670a526
 streamlit
 pymongo
 python-dotenv
