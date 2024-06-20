@@ -92,11 +92,11 @@ def save_report(result):
         else:
             metrics_text_content += f"- {key}: {value} \n"
     email_content = result["email_report"]
-    cont = email_content.encode("latin-1", errors="replace")
+    cont = email_content.encode("utf-8", errors="replace")
     cont_decoded = cont.decode("utf-8")
 
     metrics_text_content_replaced = metrics_text_content.encode(
-        "latin-1", errors="replace"
+        "utf-8", errors="replace"
     )
     metrics_text_content_decoded = metrics_text_content_replaced.decode("utf-8")
 
@@ -111,7 +111,6 @@ def save_report(result):
 st.header("View all generated reports")
 for result in results:
     with st.expander(result["competitor_name"]):
-        file_path = save_report(result)
         st.write("# Summary")
         st.write(result["email_report"])
         st.write("# Metrics")
@@ -124,11 +123,14 @@ for result in results:
                 st.write(f"- **{metrics_dict[key]}**: {value}")
             else:
                 st.write(f"- **{key}**: {value}")
-
-        with open(file_path, "rb") as file:
-            st.download_button(
-                "Download file",
-                data=file,
-                file_name=file_path,
-                mime="application/octet-stream",
-            )
+        try:
+            file_path = save_report(result)
+            with open(file_path, "rb") as file:
+                st.download_button(
+                    "Download file",
+                    data=file,
+                    file_name=file_path,
+                    mime="application/octet-stream",
+                )
+        except:
+            st.error("Error while generating PDF")
