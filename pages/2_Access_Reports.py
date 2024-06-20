@@ -92,13 +92,13 @@ def save_report(result):
         else:
             metrics_text_content += f"- {key}: {value} \n"
     email_content = result["email_report"]
-    cont = email_content.encode("utf-8", errors="replace")
-    cont_decoded = cont.decode("utf-8")
+    cont = email_content.encode("latin-1", errors="replace")
+    cont_decoded = cont.decode("latin-1")
 
     metrics_text_content_replaced = metrics_text_content.encode(
-        "utf-8", errors="replace"
+        "latin-1", errors="replace"
     )
-    metrics_text_content_decoded = metrics_text_content_replaced.decode("utf-8")
+    metrics_text_content_decoded = metrics_text_content_replaced.decode("latin-1")
 
     text_content = (
         "Summary\n\n" + cont_decoded + "\n\nMetrics\n" + metrics_text_content_decoded
